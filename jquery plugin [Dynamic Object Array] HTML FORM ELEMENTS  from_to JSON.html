@@ -1,0 +1,212 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+        <title>jquery plugin [Dynamic Object Array] HTML FORM ELEMENTS  from_to JSON</title>
+   
+    </head>
+    <body>
+	
+	
+        	
+        <h1>PLUGIN Dynamic Object Array</h1>
+		
+
+
+
+		
+		<H2>Guide</h2>
+		<ol>
+			<li>Fulfill every input in the form</li>
+			<li>Click the link Add, then you can see the items added!</li>
+			<p><i>Repeat these steps all the times that you need!</i></p>
+			<li>Finally, Click the Send button. The JSON displayed is up to you. You can save it in a DB or simply import info for your form!</li>
+		</ol>	
+		
+        
+         <form  action="" method="POST" enctype="multipart/form-data">
+               <input type="hidden" name="sended" value="1"/>
+              
+              
+               <input value="" type="hidden" name="preset" id="preset"/>
+               
+               <div>
+                  
+                   
+                   
+                   <h4> <a href="javascript:void(0);" onclick="addPresets()">
+									<span>Add</span>
+                                </a> Information 
+                    </h4>
+                                                    
+                                                    
+                  <div class="form-group">
+                    <label  for="time_on">Time ON</label>
+                    <input value=""  id="system_time_on"   type="text" class="form-control"   placeholder="">
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="time_off">Time OFF</label>
+                    <input value="" id="system_time_off"   type="text" class="form-control"   placeholder="">
+                  </div>
+                  
+                  <div class="form-group">
+                    <label  for="system_preset">Preset</label>
+                    <input value="" id="system_preset"   type="text" class="form-control"   placeholder="Kw">
+                  </div>
+                  
+                    
+                   <div class="form-group">
+                    <label  for="system_preset">Days</label>
+                    <input id="system_sunday" checked="checked"  type="checkbox" name="system_days[]" value="Sunday" />Dimanche
+                    <input id="system_monday" checked="checked"  type="checkbox" name="system_days[]" value="Monday" />Lundi
+                    <input id="system_tuesday" checked="checked"  type="checkbox" name="system_days[]" value="Tuesday" />Mardi
+                    <input id="system_wednesday" checked="checked"  type="checkbox" name="system_days[]" value="Wednesday" />Mercredi
+                    <input id="system_thursday" checked="checked"  type="checkbox" name="system_days[]" value="Thursday" />Jeudi
+                    <input id="system_friday" checked="checked"  type="checkbox" name="system_days[]" value="Friday" />Vendredi
+                    <input id="system_saturday" checked="checked"  type="checkbox" name="system_days[]" value="Saturday" />Samedi
+                  </div>
+                    
+                    
+                
+                  <p></p>
+            
+                  <div id="system_preset_list" class="list-group">
+                                      </div>
+                  <p></p>
+                   
+                  
+              </div>
+         
+              
+              
+            <input onclick="alertInfo()" type="button" class="btn btn-primary btn-lg pull-right" value="Send"/>
+          </form>
+          
+          
+
+		<H2>Enjoy!</h2>	
+		  
+                
+        
+                        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+                
+
+<script>
+ $(document).ready(function() {
+                    rebuildPresets();
+                  
+            });
+            
+
+              
+        
+</script>    
+
+
+<script>
+function alertInfo(){
+  var info = $("#preset").val();
+  
+  alert("This is the info that it will be send to your DB and then you can deal with it for fullfill your form... \n"+info);
+}
+
+
+
+function addPresets(){
+        var preset_item    = new Array();
+            
+        preset_item["system_time_on"]   = $("#system_time_on").val();
+        preset_item["system_time_off"]  = $("#system_time_off").val();
+        preset_item["system_preset"]    = $("#system_preset").val();
+        
+        var preset         = new Array();
+        var preset_list    = $("#preset").val();
+        
+        if (preset_item["system_time_on"].length == 0 ||
+            preset_item["system_time_off"].length == 0 ||
+            preset_item["system_preset"].length == 0){
+            
+            return 0;
+        }
+        
+        var days = "[";
+        var days_a = $('input[name="system_days[]"]:checked');
+        var i = 0;
+        days_a.each(function(){
+            if (i>0) days += ",";
+            
+            days += '"'+this.value+'"';  
+            i++;
+        });
+        days += "]";
+        
+        
+        if (preset_list.length > 0){
+            preset = eval(preset_list);
+        }
+        
+        //ADD ADDRESS TO THE LIST
+        //preset.push(preset_item);
+        preset.push("{'time_on':'"+preset_item["system_time_on"]+"','time_off':'"+preset_item["system_time_off"]+"','preset':'"+preset_item["system_preset"]+"', 'days':'"+days+"'}");
+
+        //SAVE LIST IN  THE INPUT
+        $("#preset").val(JSON.stringify(preset));
+        
+        //console.log(preset); return 0;
+        
+        //REBUILD THE LIST
+        rebuildPresets();
+        
+        //REMOVE ADDRESS TEXT
+        $("#system_time_on").val("");
+        $("#system_time_off").val("");
+        $("#system_preset").val("");
+        
+    }
+    
+    function deletePresets(id){
+        
+        var preset_list    = $("#preset").val();
+        var preset = eval(preset_list);
+        
+        //SUPPRIME THE ITEM FROM THE LIST
+        preset.splice(id, 1);
+        
+        //SAVE THE LIST WITHOUT THE ITEM
+        $("#preset").val(JSON.stringify(preset));
+        
+        //REBUILD THE LIST
+        rebuildPresets();
+        
+    }
+    
+    function rebuildPresets(){
+         var preset            = eval($("#preset").val());
+         var id_item            = 0;
+     
+         
+        if (typeof preset === 'undefined'){
+            return 0;
+        }
+        
+         $("#system_preset_list").html("");
+         preset.forEach(function(item) {
+             
+              var current = eval("("+item+")");
+            
+             $("#system_preset_list").append('<div class="list-group-item">Time ON: '+current.time_on+', Time OFF: '+current.time_off+', Preset: '+current.preset+', Days: '+current.days+'<a onclick="deletePresets('+id_item+');" href="javascript:void(0);" > <span class=" pull-right glyphicon glyphicon-minus"></span></a></div>');
+            
+             id_item++;
+       
+        });
+    }
+        
+    
+</script>    
+
+
+</body>
+</html>
